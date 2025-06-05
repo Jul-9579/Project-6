@@ -9,7 +9,7 @@ load_dotenv()
 
 # Define the function to get data from your Supabase PostgreSQL table
 def get_api_data():
-    dbconn = os.getenv("DBCONN")  # Make sure this is in your .env file
+    dbconn = st.secrets["DBCONN"]  # Make sure this is in your .env file
     conn = psycopg.connect(dbconn)
     cur = conn.cursor()
 
@@ -55,7 +55,7 @@ from dotenv import load_dotenv
 load_dotenv()  # Make sure this is at the top of your script
 
 def get_article_data():
-    dbconn = os.getenv("DBCONN")  # Ensure your .env uses DBCONN, not DB_CONN (unless your code matches)
+    dbconn = dbconn = st.secrets["DBCONN"]  # Ensure your .env uses DBCONN, not DB_CONN (unless your code matches)
     if dbconn is None:
         raise ValueError("❌ Environment variable 'DBCONN' not found. Check your .env file.")
 
