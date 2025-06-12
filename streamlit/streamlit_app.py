@@ -12,14 +12,6 @@ st.set_page_config(page_title="Bitcoin Dashboard", layout="centered")
 load_dotenv()
 
 
-# --- Custom Styling ---
-st.markdown("""
-    <style>
-    html, body, [class*="css"] {
-        color: #000000 !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
 
 # --- Database fetching functions ---
 
@@ -55,8 +47,8 @@ def get_article_data():
 st.title("📊 Bitcoin Dashboard")
 st.markdown("This dashboard shows daily Bitcoin closing prices and the latest crypto-related articles from u.today.")
 
-if st.button("🔄 Refresh Data"):
-    st.rerun()
+# if st.button("🔄 Refresh Data"):
+#     st.rerun()
 
 # --- Price Data Section ---
 
@@ -80,7 +72,7 @@ try:
 
     st.dataframe(filtered_data, use_container_width=True)
 
-    # Line chart with legend simulation
+    # Line chart (cleaned up, no legend)
     line_chart = alt.Chart(filtered_data).mark_line(color='orange').encode(
         x=alt.X('date:T', title='Date'),
         y=alt.Y('close:Q', title='Closing Price (€)'),
@@ -91,13 +83,7 @@ try:
         height=400
     ).interactive()
 
-    legend_label = alt.Chart(pd.DataFrame({'Legend': ['Bitcoin']})).mark_point(
-        filled=True, color='orange', size=100
-    ).encode(
-        y=alt.Y('Legend:N', axis=alt.Axis(title=''))
-    )
-
-    st.altair_chart(line_chart & legend_label)
+    st.altair_chart(line_chart)
 
 except Exception as e:
     st.error(f"❌ Failed to load price data: {e}")
