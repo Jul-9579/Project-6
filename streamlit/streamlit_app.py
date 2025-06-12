@@ -6,7 +6,7 @@ import pandas as pd
 import altair as alt  # Only import once, globally
 
 # Set page config FIRST
-st.set_page_config(page_title="Bitcoin Dashboard", layout="centered")
+# st.set_page_config(page_title="Bitcoin Dashboard", layout="centered")
 
 # Load environment variables
 load_dotenv()
