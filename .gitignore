@@ -1,3 +1,6 @@
 .env
 /Resources/
+/Exercises/
 \.streamlit
+\package
+*.zip
