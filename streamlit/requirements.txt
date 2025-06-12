@@ -3,3 +3,4 @@ pandas
 psycopg
 psycopg-binary
 python-dotenv
+tabulate
