@@ -3,10 +3,12 @@ from dotenv import load_dotenv
 import os
 import psycopg
 import pandas as pd
-import altair as alt
+import altair as alt  # Only import once, globally
+
 
 # Load environment variables
 load_dotenv()
+
 
 # --- Custom Styling ---
 st.markdown("""
