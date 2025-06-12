@@ -47,10 +47,7 @@ def get_article_data():
 st.title("📊 Bitcoin Dashboard")
 st.markdown("This dashboard shows daily Bitcoin closing prices and the latest crypto-related articles from u.today.")
 
-# if st.button("🔄 Refresh Data"):
-#     st.rerun()
 
-# --- Price Data Section ---
 
 try:
     api_data = get_api_data()
@@ -94,20 +91,54 @@ st.header("📰 Latest Bitcoin News")
 try:
     article_data = get_article_data()
 
-    # Search functionality
-    search_term = st.text_input("🔍 Search articles")
-    if search_term:
-        filtered_articles = article_data[article_data.apply(
-            lambda row: row.astype(str).str.contains(search_term, case=False).any(), axis=1)]
-    else:
-        filtered_articles = article_data
+    # Convert date column if needed
+    if 'date' in article_data.columns:
+        article_data['date'] = pd.to_datetime(article_data['date'])
 
-    # Format links if 'link' column exists
+    # Sidebar or top filters
+    st.subheader("🧰 Filter Articles")
+
+    # Author filter
+    if 'author' in article_data.columns:
+        authors = article_data['author'].dropna().unique()
+        selected_author = st.selectbox("Filter by author", options=["All"] + sorted(authors.tolist()))
+    else:
+        selected_author = "All"
+
+    # Date filter
+    if 'date' in article_data.columns:
+        min_date = article_data['date'].min().date()
+        max_date = article_data['date'].max().date()
+        start_date, end_date = st.date_input("Filter by publication date", [min_date, max_date])
+    else:
+        start_date = end_date = None
+
+    # Search bar
+    search_term = st.text_input("🔍 Search articles")
+
+    # --- Filtering Logic ---
+    filtered_articles = article_data.copy()
+
+    if selected_author != "All":
+        filtered_articles = filtered_articles[filtered_articles['author'] == selected_author]
+
+    if start_date and end_date:
+        filtered_articles = filtered_articles[
+            (filtered_articles['date'].dt.date >= start_date) &
+            (filtered_articles['date'].dt.date <= end_date)
+        ]
+
+    if search_term:
+        filtered_articles = filtered_articles[
+            filtered_articles.apply(lambda row: row.astype(str).str.contains(search_term, case=False).any(), axis=1)
+        ]
+
+    # Format links
     if 'link' in filtered_articles.columns:
         filtered_articles['link'] = filtered_articles['link'].apply(
             lambda url: f"[Read more]({url})" if pd.notnull(url) else "")
-    
-    # Display markdown table if link column exists
+
+    # Display markdown table or dataframe
     if 'link' in filtered_articles.columns:
         st.markdown(filtered_articles.to_markdown(index=False), unsafe_allow_html=True)
     else:
