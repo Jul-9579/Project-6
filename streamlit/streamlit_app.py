@@ -5,6 +5,8 @@ import psycopg
 import pandas as pd
 import altair as alt  # Only import once, globally
 
+# Set page config FIRST
+st.set_page_config(page_title="Bitcoin Dashboard", layout="centered")
 
 # Load environment variables
 load_dotenv()
@@ -50,13 +52,11 @@ def get_article_data():
 
 # --- Streamlit UI ---
 
-st.set_page_config(page_title="Bitcoin Dashboard", layout="centered")
-
 st.title("📊 Bitcoin Dashboard")
 st.markdown("This dashboard shows daily Bitcoin closing prices and the latest crypto-related articles from u.today.")
 
 if st.button("🔄 Refresh Data"):
-    st.experimental_rerun()
+    st.rerun()
 
 # --- Price Data Section ---
 
