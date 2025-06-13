@@ -3,15 +3,10 @@ from dotenv import load_dotenv
 import os
 import psycopg
 import pandas as pd
-import altair as alt  # Only import once, globally
-
-# Set page config FIRST
-# st.set_page_config(page_title="Bitcoin Dashboard", layout="centered")
+import altair as alt
 
 # Load environment variables
 load_dotenv()
-
-
 
 # --- Database fetching functions ---
 
@@ -47,7 +42,7 @@ def get_article_data():
 st.title("📊 Bitcoin Dashboard")
 st.markdown("This dashboard shows daily Bitcoin closing prices and the latest crypto-related articles from u.today.")
 
-
+# --- Bitcoin Price Data Section ---
 
 try:
     api_data = get_api_data()
@@ -69,7 +64,7 @@ try:
 
     st.dataframe(filtered_data, use_container_width=True)
 
-    # Line chart (cleaned up, no legend)
+    # Line chart
     line_chart = alt.Chart(filtered_data).mark_line(color='orange').encode(
         x=alt.X('date:T', title='Date'),
         y=alt.Y('close:Q', title='Closing Price (€)'),
@@ -91,11 +86,9 @@ st.header("📰 Latest Bitcoin News")
 try:
     article_data = get_article_data()
 
-    # Convert date column if needed
     if 'date' in article_data.columns:
         article_data['date'] = pd.to_datetime(article_data['date'])
 
-    # Sidebar or top filters
     st.subheader("🧰 Filter Articles")
 
     # Author filter
@@ -133,16 +126,32 @@ try:
             filtered_articles.apply(lambda row: row.astype(str).str.contains(search_term, case=False).any(), axis=1)
         ]
 
-    # Format links
-    if 'link' in filtered_articles.columns:
-        filtered_articles['link'] = filtered_articles['link'].apply(
-            lambda url: f"[Read more]({url})" if pd.notnull(url) else "")
+    # --- Display articles with bookmark option ---
+    st.markdown("### 📰 Filtered Articles")
 
-    # Display markdown table or dataframe
-    if 'link' in filtered_articles.columns:
-        st.markdown(filtered_articles.to_markdown(index=False), unsafe_allow_html=True)
-    else:
-        st.dataframe(filtered_articles, use_container_width=True)
+    for i, row in filtered_articles.iterrows():
+        st.markdown(f"""
+        **{row['title']}**  
+        *By {row['author']} on {row['date'].strftime('%d %b %Y')}*  
+        [🔗 Read more]({row['link']})
+        """)
+        
+        # Bookmark checkbox
+        if st.checkbox("📌 Bookmark", key=f"bookmark_{i}"):
+            if "saved_articles" not in st.session_state:
+                st.session_state["saved_articles"] = []
+            # Avoid duplicate saves
+            if not any(row['title'] == a['title'] for a in st.session_state["saved_articles"]):
+                st.session_state["saved_articles"].append(row)
+
+        st.markdown("---")
 
 except Exception as e:
     st.error(f"❌ Failed to load articles: {e}")
+
+# --- Bookmarked Articles Section ---
+
+if "saved_articles" in st.session_state and st.session_state["saved_articles"]:
+    st.header("📚 Bookmarked Articles")
+    for article in st.session_state["saved_articles"]:
+        st.markdown(f"- [{article['title']}]({article['link']}) by {article['author']}")
